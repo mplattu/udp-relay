@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# ais-relay
+#		This shell script takes care of starting and stopping
+#		ais-relay, the UDP data relay program
+#
+# chkconfig: - 58 74
+# description: ais-relay is the AIS data relay daemon.
+
+# Source function library.
+. /etc/init.d/functions
+
+RETVAL=0
+prog="ais-relay"
+
+start() {
+        # Start daemons.
+        echo -n $"Starting $prog: "
+        daemon /usr/local/bin/udp-relay "3444:83.145.241.154:3444:/var/lock/subsys/ais-relay.pid &"
+	RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/ais-relay
+	return $RETVAL
+}
+
+stop() {
+        echo -n $"Shutting down $prog: "
+	kill -TERM `cat /var/lock/subsys/ais-relay.pid`
+        rm -f /var/lock/subsys/ais-relay
+	return 0
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+        ;;
+  stop)
+	stop
+        ;;
+  status)
+	status nc
+	RETVAL=$?
+	;;
+  restart|reload)
+	stop
+	start
+	RETVAL=$?
+	;;
+  condrestart)
+	if [ -f /var/lock/subsys/ais-relay ]; then
+	    stop
+	    start
+	    RETVAL=$?
+	fi
+	;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+        RETVAL=3
+esac
+
+exit $RETVAL
