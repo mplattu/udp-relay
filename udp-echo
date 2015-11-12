@@ -31,6 +31,16 @@ def removePidFile(pidFileName):
 		if ex.errno != 2:
 			sys.stderr.write("#%i Failed to remove PID file %s\n" % (int(ex.errno), pidFileName))
 
+def writeOutput(fileName, message):
+	message = "%s: '%s'" % (time.strftime("%Y-%m-%d %H:%M:%S"), message)
+	
+	if fileName == '-':
+		print(message)
+	else:
+		out = open(fileName, "a")
+		out.write(message + "\n")
+		out.close()
+		
 def signalTermHandler (signum, frame):
 	global pidFile
 
@@ -75,4 +85,4 @@ while True:
 		# Normal termination
 		sys.exit(0)
 
-	print("%s: '%s'" % (time.strftime("%Y-%m-%d %H:%M:%S"), data))
+	writeOutput(outputFile, data)
