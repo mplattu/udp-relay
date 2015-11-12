@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# ais-dispatcher
+#		This shell script takes care of starting and stopping
+#		ais-dispatcher, the AIS data relay software.
+#
+# chkconfig: - 58 74
+# description: ais-dispatcher is the AIS data relay daemon.
+
+# Source function library.
+. /etc/init.d/functions
+
+RETVAL=0
+prog="ais-logger"
+
+start() {
+        # Start daemons.
+        echo -n $"Starting $prog: "
+        daemon /usr/local/bin/udp-echo "3443:/var/lock/subsys/ais-echo.pid >>/var/log/ais1.log &"
+	RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/ais-logger
+	return $RETVAL
+}
+
+stop() {
+        echo -n $"Shutting down $prog: "
+	kill -TERM `cat /var/lock/subsys/ais-echo.pid`
+        rm -f /var/lock/subsys/ais-logger
+	return 0
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+        ;;
+  stop)
+	stop
+        ;;
+  status)
+	status nc
+	RETVAL=$?
+	;;
+  restart|reload)
+	stop
+	start
+	RETVAL=$?
+	;;
+  condrestart)
+	if [ -f /var/lock/subsys/ais-logger ]; then
+	    stop
+	    start
+	    RETVAL=$?
+	fi
+	;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+        RETVAL=3
+esac
+
+exit $RETVAL
