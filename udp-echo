@@ -2,7 +2,7 @@
 # Super simple script that listens to a local UDP port and relays all packets to an arbitrary remote host.
 # Works with Python 2 and 3
 
-import sys, socket, os, signal, errno, time
+import sys, socket, os, signal, errno, time, argparse
 
 DEBUG=False
 
@@ -39,22 +39,16 @@ def signalTermHandler (signum, frame):
 
 	sys.exit(0)
 
-if len(sys.argv) != 2 or (len(sys.argv[1].split(':')) != 1 and len(sys.argv[1].split(':')) != 2):
-	fail('Usage: udp-echo.py localPort[:pidfile]')
+parser = argparse.ArgumentParser(description='udp-echo writes incoming UDP messages to STDOUT or file')
+parser.add_argument('-p', '--port', help='Local port number to listen', required=True, type=int)
+parser.add_argument('-l', '--lock', help='Lock/PID file path', required=False, default=None)
+parser.add_argument('-o', '--output', help='Output file path, if unspecified outputs to STDOUT', required=False, default='-')
 
-if len(sys.argv[1].split(':')) == 1:
-	localPort = sys.argv[1].split(':')
-	pidFile = None
-else:
-	localPort, pidFile = sys.argv[1].split(':')
+args = parser.parse_args()
 
-if type(localPort) is list:
-	localPort = localPort[0]
-
-try:
-	localPort = int(localPort)
-except:
-	fail('Invalid port number: ' + str(localPort))
+localPort = args.port
+pidFile = args.lock
+outputFile = args.output
 
 try:
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
