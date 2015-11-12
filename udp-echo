@@ -32,7 +32,7 @@ def removePidFile(pidFileName):
 			sys.stderr.write("#%i Failed to remove PID file %s\n" % (int(ex.errno), pidFileName))
 
 def writeOutput(fileName, message):
-	message = "%s: '%s'" % (time.strftime("%Y-%m-%d %H:%M:%S"), message)
+	message = "%s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S"), message.encode('string_escape'))
 	
 	if fileName == '-':
 		print(message)
