@@ -1,0 +1,4 @@
+# Add reay options here:
+# incoming_port:outbound_address:outbound_port:pid_path
+
+RELAYOPTIONS="3232:some.server.addr:3444:/var/lock/subsys/ais-relay.pid"
